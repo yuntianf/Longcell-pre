@@ -28,7 +28,7 @@ g++ -O2 BarcodeMatch.cpp bc.cpp edit.cpp normal.cpp -o BarcodeMatch
 1. tranform exon bins to exon id (match the exon to the annotation in gene bed for more straightforward downstream analysis)
 2. save the quantification as sparse matrix (interface for downstream alternative splicing analysis in Longcell)
 
-## quick demo
+## quick start
 
 ### step1: transform gtf to gene bed
 ```
@@ -41,7 +41,6 @@ This step will transform the isoform annotation in gtf into non-overlapping sub-
 4. length  
 5. strand
 
-#### parameters
 __required__:  
 1. gtf: The gtf annotation for corresponding organism, can easily be obtained from gencode https://www.gencodegenes.org/human/  
 2. bed_folder: The output folder to store bed files
@@ -179,7 +178,8 @@ The output `sub_cell_gene_splice_count.*.txt` is a table with 7 columns, includi
 
 ### optional step6: trasform exon bins to exon id
 ```
-$Rscript ./spliceob/createExonList.R $outdir/cell_gene_splice_count/ $bed_folder/gene_bed.rds $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt
+Rscript ./spliceob/createExonList.R $outdir/cell_gene_splice_count/ $bed_folder/gene_bed.rds $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt
+awk 'FNR>1 || NR==1' $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt > $outdir/cell_gene_exon_count/cell_gene_exon_count.txt
 ```
 This step transforms the exon bins to exon id given the input bed annotation. Bed annotation could be canonical or self-made from the data. This step loops over all files in the input folder, which is output from step 5, thus it's also paralleled by GNU.
 
@@ -189,18 +189,18 @@ __required__:
 2. gene bed annotation: should be an RDS of a dataframe, including all interested genes. If no special requirement, the `gene_bed.rds` output from step1 can be directly used
 3. output file name
 
-
 The output `sub_cell_gene_exon_count.*.txt` is generally the same as `sub_cell_gene_splice_count.*.txt`, except for the representation of isoforms.
 
-### optional step7: build splice object
+### optional step7: save the data for Longcell
 ```
-Rscript ./spliceob/ExonList2SpliceOb.R $outdir/cell_gene_exon_count/cell_gene_exon_count.txt $outdir/cell_gene_exon_count/splice_ob.rds
+Rscript ./spliceob/saveExonList.R $outdir/cell_gene_exon_count/cell_gene_exon_count.txt $outdir/cell_gene_exon_count/
 ```
-As storing the isoform expression for each single cell as a long table is memory costing, here we transform it into a R S4 object, which is also the interface for downstream alternative splicing analysis.
-
 #### parameters
 __required__: 
-1. input file: output folder from step6
-3. output file name
+1. input file: output file from step6
+3. output folder
+
+This step stores the single cell isoform expression as a sparse matrix to save memory, which is also the input format for Longcell.
+
 
 For the tutorial of downstream alternative splicing analysis, please refer to the vignette: 
