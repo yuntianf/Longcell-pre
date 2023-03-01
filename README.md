@@ -1,4 +1,4 @@
-scLongPipe is a pipeline to analyze Nanopore long read sequencing dataset based on 10X single cell sequencing toolkit. This pipeline includes preprocessing to do barcode and unique molecular identifier (UMI) assignment to give an accurate isoform quantification. Based on the isoform quantification, this pipeline also incorporates downstream splicing analysis, including identification of highly variable exons and differential alternative splicing analysis between different cell populations.
+Longcell-pre is a pipeline to analyze Nanopore long read sequencing dataset based on 10X single cell sequencing toolkit. This pipeline includes preprocessing to do barcode and unique molecular identifier (UMI) assignment to give an accurate isoform quantification. Based on the isoform quantification from Longcell-pre, our another  pipeline Longcell incorporates downstream splicing analysis, including identification of highly variable exons and differential alternative splicing analysis between different cell populations.
 
 
 ## Installation
@@ -23,14 +23,12 @@ g++ -O2 BarcodeMatch.cpp bc.cpp edit.cpp normal.cpp -o BarcodeMatch
 2. identify cell barcodes from softclips
 3. combine cell barcodes with each read and filter out reads without barcodes
 4. UMI deduplication
-5. (optional) transform exon bins into exon id
-6. (optional) build splice object
 
 ### optional step
-1. tranform exon bins to exon id (for more straightforward downstream analysis)
-2. build splice object (interface for downstream GLRT and identification of highly varaible exons)
+1. tranform exon bins to exon id (match the exon to the annotation in gene bed for more straightforward downstream analysis)
+2. save the quantification as sparse matrix (interface for downstream alternative splicing analysis in Longcell)
 
-## demo
+## quick demo
 
 ### step1: transform gtf to gene bed
 ```
@@ -47,6 +45,33 @@ This step will transform the isoform annotation in gtf into non-overlapping sub-
 __required__:  
 1. gtf: The gtf annotation for corresponding organism, can easily be obtained from gencode https://www.gencodegenes.org/human/  
 2. bed_folder: The output folder to store bed files
+
+### step2: Single cell isoform quantification
+```
+./Longcell-pre.sh -b $bam_file -d $bed_dir -w $barcode_whitelist -c $cores_num -o $out_dir
+```
+This is an integrated pipeline to directly generate single cell isoform quantification from the bam. The output include three folders:
+1. barcode_match: stores the barcode match result  
+2. cell_gene_splice_count: stores the single cell isoform count as a long table. Each isoform is representated by a sequence of exons. Each exon is representated by a bin of its start and end site.
+3. cell_gene_exon_count: stores the same information as cell_gene_splice_count, but in sparse matrix format. And exons are transformed to exon id with the reference of gene bed annotation from the $bed_dir
+
+
+#### parameters
+__required__:  
+1. -b, --bam: The bam file input 
+2. -d, --bed: Input folder for bed annotations
+3. -w, --whitelist: Input barcode whitelist as the reference for barcode matching
+4. -c, --cores: The number of cores to parallel the process
+5. -o, --outdir: The path to store the output files
+
+#### parameters
+__optional__:  
+1. -h, --help: print the parameter information 
+2. -t, --toolkit: The 10X toolkit for library preparation (The location of the cell barcode and UMI in the read), default as 5'
+3. -L, --blen: the length of the cell barcode, default as 16
+4. -l, --ulen: the length of the UMI, default as 10
+
+## detailed explanation for each step
 
 ### step2: extract softclips and exon seq for each read from the bam file
 ```
@@ -77,7 +102,7 @@ The output `exon_read.txt` is a table with 7 columns, including:
 ### step3: barcode match
 ```
 cut -f 1,2 $outdir/exon_reads/exon_reads.txt > $outdir/softclips/softclips.txt
-python ./BarcodeMatch/BarcodeMatch.py -q $outdir/softclips/softclips.txt -c $barcodes -o "$outdir/barcode_match/pos_bc.txt" -co $cores
+python ./BarcodeMatch/BarcodeMatch.py -q $outdir/softclips/softclips.txt -c $barcodes -o "$outdir/barcode_match/bc.txt" -co $cores
 ```
 This step will identify the cell barcode in the softclips from the long reads with the reference of barcode whitelist. Here we applied two methods to speed this process up, and the intersection of their results can provide the highest correct ratio.
 
