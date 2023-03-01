@@ -5,15 +5,16 @@ scLongPipe is a pipeline to analyze Nanopore long read sequencing dataset based 
 requires:  
 - GNU: https://www.gnu.org/software/parallel/  
 - boost library: https://www.boost.org/  
+- python packages: pysam, pandas, numpy, pathos, functools, multiprocessing, argparse
+- R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse
 
 ```
 git clone https://github.com/dontwantcode/Single-cell-long-reads.git
-cd ./Single-cell-long-reads/scripts/
-dos2unix scLongPipe.sh
-chmod a+x scLongPipe.sh
+cd ./Longcell-pre/scripts/
+dos2unix Longcell-pre.sh
+chmod a+x Longcell-pre.sh
 cd ./BarcodeMatch/
-g++ -O2 ./posBarcodeMatch.cpp -o posBarcodeMatch
-g++ -O2 ./cosBarcodeMatch.cpp -o cosBarcodeMatch
+g++ -O2 BarcodeMatch.cpp bc.cpp edit.cpp normal.cpp -o BarcodeMatch
 ```
 
 ## Workflow
