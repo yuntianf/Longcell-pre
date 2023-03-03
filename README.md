@@ -204,3 +204,14 @@ This step stores the single cell isoform expression as a sparse matrix to save m
 
 
 For the tutorial of downstream alternative splicing analysis, please refer to the vignette: 
+
+
+## Citation
+
+If you use Longcell for published work, please cite our manuscript:
+
+``` r
+Single cell and spatial alternative splicing analysis with long read sequencing
+Yuntian Fu, Heonseok Kim, Jenea I. Adams, Susan M. Grimes, Sijia Huang, Billy T. Lau, Anuja Sathe, Paul Hess, Hanlee P. Ji, Nancy R. Zhang
+bioRxiv 2023.02.23.529769; doi: https://doi.org/10.1101/2023.02.23.529769
+```
