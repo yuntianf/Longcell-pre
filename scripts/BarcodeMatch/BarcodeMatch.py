@@ -6,7 +6,6 @@ import argparse
 import numpy as np
 import sys
 import multiprocessing as ml
-from functools import partial
 import warnings
 from pathos.multiprocessing import ProcessingPool as Pool
 
