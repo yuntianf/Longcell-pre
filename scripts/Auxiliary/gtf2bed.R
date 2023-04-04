@@ -1,9 +1,23 @@
-library(GenomicFeatures)
+suppressPackageStartupMessages(library(GenomicFeatures))
+library(parallel)
+library(argparse)
 
+parser <- ArgumentParser()
 
-args <- commandArgs(trailingOnly = TRUE)
-gtf_path = args[1]
-out_path = args[2]
+parser$add_argument("-g", "--gtf", type="character", 
+                    help="The file path for the input gtf")
+parser$add_argument("-o", "--out", type="character", 
+                    help="The output directory")
+parser$add_argument("-c", "--cores", type="integer", default=4,
+                    help="The number of cores for parallization")
+
+args <- parser$parse_args()
+
+gtf_path = args$gtf
+out_path = args$out
+cores = args$cores
+
+dir.create(out_path, showWarnings = FALSE)
 
 ### build bed file annotation for each gene ###
 txdb <- makeTxDbFromGFF(gtf_path,format="gtf")
@@ -12,55 +26,30 @@ exons_temp = exonicParts(txdb)
 
 temp = as.data.frame(exons_temp)
 temp = temp[,c(1:5,8)]
-temp <- lapply(1:nrow(temp),function(i){
-  gene = unlist(temp[i,"gene_id"])
-  gene = sapply(gene,function(y) unlist(strsplit(y,split = ".",fixed = T))[1])
-  x = cbind(temp[i,1:5],gene)
-  return(x)
-})
-temp <- as.data.frame(do.call(rbind,temp))
+temp[,"gene_id"] = sapply(temp[,"gene_id"], `[[`, 1)
+temp[,"gene_id"] = substr(temp[,"gene_id"],1,15)
 colnames(temp)[1] <- c("chr")
 
-cache <- sapply(unique(temp$gene),function(x){
+core_avai = parallel::detectCores()
+cores = ifelse(cores > core_avai,core_avai,cores)
+
+cache <- mclapply(unique(temp$gene),function(x){
   sub_temp = temp[temp$gene == x,]
   filename = paste(c(out_path,x,".txt"),collapse = "")
   write.table(sub_temp[,1:5],file = filename,row.names = F,col.names = F,quote = F)
-})
+},mc.cores = getOption("mc.cores", cores))
 
 saveRDS(temp,file = paste(out_path,"gene_bed.rds",sep = "/"))
 
 ### build exon gtf ###
-gtf_data = read.table(gtf_path,sep = "\t",comment.char = "#")
-gtf_data = gtf_data[,c(3,4,5,9)]
-colnames(gtf_data) = c("type","start","end","info")
-gtf_data = gtf_data[gtf_data$type == "exon",]
-gtf_data = gtf_data[,-1]
+gtf_data = as.data.frame(exons(txdb, columns=c("gene_id","tx_name","exon_name"), 
+                               filter=NULL, use.names=FALSE))
+gtf_data[,"gene_id"] = sapply(gtf_data[,"gene_id"], `[[`, 1)
+gtf_data[,"tx_name"] = sapply(gtf_data[,"tx_name"], `[[`, 1)
 
-gtf_info_split <- function(info,keys = c(),split = "; ",sep = " "){
-  delimiter = paste(split,sep,sep = "|")
-  info = unlist(strsplit(info,split = delimiter))
-  
-  value = info[seq(2,length(info),2)]
-  key = info[seq(1,length(info),2)]
-  
-  names(value) = key
-  return(value)
-}
-info = lapply(gtf_data$info,function(x){
-  out = gtf_info_split(x)
-  return(out)
-})
-info = as.data.frame(do.call(rbind,info))
+gtf_data$gene_id = substr(gtf_data$gene_id,1,15)
+gtf_data = gtf_data[,c(2:3,6:8)]
+colnames(gtf_data)[4:5] = c("transname","exon_id")
 
-gtf_data = cbind(gtf_data,info)
-
-gtf_data = gtf_data[,c("start","end","gene_id",
-                       "transcript_type","transcript_name","exon_id")]
-gtf_data$gene_id = sapply(gtf_data$gene_id,function(x){
-  temp = unlist(strsplit(x,split = ".",fixed = TRUE))
-  return(temp[1])
-})
-
-colnames(gtf_data)[c(4,5)] = c("transtype","transname")
 saveRDS(gtf_data,file = paste(out_path,"exon_gtf.rds",sep = "/"))
 
