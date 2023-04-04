@@ -5,8 +5,8 @@ Longcell-pre is a pipeline to analyze Nanopore long read sequencing dataset base
 requires:  
 - GNU: https://www.gnu.org/software/parallel/  
 - boost library: https://www.boost.org/  
-- python packages: pysam, pandas, numpy, pathos, functools, multiprocessing, argparse
-- R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse
+- python packages: pysam, pandas, numpy, pathos, multiprocessing, argparse
+- R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse, GenomicFeatures
 
 ```
 git clone https://github.com/dontwantcode/Single-cell-long-reads.git
@@ -32,7 +32,7 @@ g++ -O2 BarcodeMatch.cpp bc.cpp edit.cpp normal.cpp -o BarcodeMatch
 
 ### step1: transform gtf to gene bed
 ```
-Rscript ./Auxiliary/gtf2bed.R $gtf $bed_folder
+Rscript ./Auxiliary/gtf2bed.R -g $gtf -o $bed_folder
 ```
 This step will transform the isoform annotation in gtf into non-overlapping sub-exons and save it as a bed file for each gene. The output is a table with 5 columns, including:
 1. chromosome  
