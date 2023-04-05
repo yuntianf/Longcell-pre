@@ -6,7 +6,7 @@ requires:
 - GNU: https://www.gnu.org/software/parallel/  
 - boost library: https://www.boost.org/  
 - python packages: pysam, pandas, numpy, pathos, multiprocessing, argparse
-- R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse, GenomicFeatures, parallel, knapsack
+- R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse, GenomicFeatures, parallel, knapsack (can be installed via `install.packages("knapsack", repos="http://R-Forge.R-project.org")`)
 
 ```
 git clone https://github.com/dontwantcode/Single-cell-long-reads.git
