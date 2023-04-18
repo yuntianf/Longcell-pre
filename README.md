@@ -9,7 +9,7 @@ requires:
 - R packages: Rcpp, dbscan, reshape2, tidyr, transport, RcppHungarian, NameNeedle, igraph, MASS, stat4, argparse, GenomicFeatures, parallel, e1071, knapsack (can be installed via `install.packages("knapsack", repos="http://R-Forge.R-project.org")`)
 
 ```
-git clone https://github.com/dontwantcode/Single-cell-long-reads.git
+git clone https://github.com/yuntianf/Longcell-pre.git
 cd ./Longcell-pre/scripts/
 dos2unix Longcell-pre.sh
 chmod a+x Longcell-pre.sh
