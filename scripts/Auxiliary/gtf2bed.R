@@ -27,7 +27,7 @@ exons_temp = exonicParts(txdb)
 temp = as.data.frame(exons_temp)
 temp = temp[,c(1:5,8)]
 temp[,"gene_id"] = sapply(temp[,"gene_id"], `[[`, 1)
-temp[,"gene_id"] = substr(temp[,"gene_id"],1,15)
+temp[,"gene_id"] = gsub("\\..*$", "", temp[,"gene_id"])
 colnames(temp)[1] <- c("chr")
 
 core_avai = parallel::detectCores()
