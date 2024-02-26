@@ -1,4 +1,4 @@
-This version of Longcell-pre has been deprecated.
+This version of Longcell-pre has been deprecated. For the newest vresion, please refer to `https://github.com/yuntianf/LongcellPre.git`
 
 Longcell-pre is a pipeline to analyze Nanopore long read sequencing dataset based on 10X single cell sequencing toolkit. This pipeline includes preprocessing to do barcode and unique molecular identifier (UMI) assignment to give an accurate isoform quantification. Based on the isoform quantification from Longcell-pre, our another  pipeline Longcell incorporates downstream splicing analysis, including identification of highly variable exons and differential alternative splicing analysis between different cell populations.
 
@@ -76,13 +76,13 @@ __optional__:
 
 ### step2: extract softclips and exon seq for each read from the bam file
 ```
-python ./SoftclipsExon/softclip_splicesite.py -b $bam -t $toolkit -g $bed -o $outdir/exon_reads/
+python ./SoftclipsExon/softclip_splicesite.py -b bam−tbam -t toolkit -g bed−obed -o outdir/exon_reads/
 ```
 This step will extract reads from the bam within the designated region annotated in the bed file. Usually this order will just extract reads for one gene and we parallel this process with __GNU__ to traverse all bed files in the bash file. 
 ```
-find $bed_folder -name EN*.bed | parallel -j $cores python ./SoftclipsExon/softclip_splicesite.py -b $bam -t $toolkit -g {} -o $outdir/exon_reads/
+find bedfolder−nameEN∗.bed|parallel−jbed_folder -name EN*.bed | parallel -j cores python ./SoftclipsExon/softclip_splicesite.py -b bam−tbam -t toolkit -g {} -o $outdir/exon_reads/
 find $outdir/exon_reads/ -name "*" -type f -size 0c | xargs -n 1 rm -f
-cat $outdir/exon_reads/EN*.bed > $outdir/exon_reads/exon_reads.txt
+cat outdir/exonreads/EN∗.bed>outdir/exon_reads/EN*.bed > outdir/exon_reads/exon_reads.txt
 ```
 #### parameters
 __required__:  
@@ -102,8 +102,8 @@ The output `exon_read.txt` is a table with 7 columns, including:
 
 ### step3: barcode match
 ```
-cut -f 1,2 $outdir/exon_reads/exon_reads.txt > $outdir/softclips/softclips.txt
-python ./BarcodeMatch/BarcodeMatch.py -q $outdir/softclips/softclips.txt -c $barcodes -o "$outdir/barcode_match/bc.txt" -co $cores
+cut -f 1,2 outdir/exonreads/exonreads.txt>outdir/exon_reads/exon_reads.txt > outdir/softclips/softclips.txt
+python ./BarcodeMatch/BarcodeMatch.py -q outdir/softclips/softclips.txt−coutdir/softclips/softclips.txt -c barcodes -o "outdir/barcode_match/bc.txt" -co outdir/barcode_match/bc.txt" -co cores
 ```
 This step will identify the cell barcode in the softclips from the long reads with the reference of barcode whitelist. Here we applied two methods to speed this process up, and the intersection of their results can provide the highest correct ratio.
 
@@ -129,7 +129,7 @@ The output `bc.txt` is a table with 2 columns, including:
 
 ### step4: combine cell barcodes with each read and filter out reads without barcodes
 ```
-Rscript ./BarcodeMatch/barcode_merge.R $outdir/barcode_match/bc.txt $outdir/exon_reads/exon_reads.txt $num $outdir/sub_cell_exon/
+Rscript ./BarcodeMatch/barcode_merge.R outdir/barcode_match/bc.txt outdir/barcode_match/bc.txt outdir/exon_reads/exon_reads.txt num num outdir/sub_cell_exon/
 ```
 This step merge identified barcodes with corresponding reads and filter out reads with no or more than 1 barcode. The output will be splited into subfiles for parallization in UMI deduplication step. As the UMI deduplication treats the gene as the minimal unit, the number of subfiles couldn't exceed the number of genes.
 
@@ -153,7 +153,7 @@ The output `sub_cell_exon.id.txt` is a table with 9 columns, including:
 
 ### step5: UMI deduplication
 ```
-Rscript $script -c $outdir/sub_cell_exon/sub_cell_exon.*.txt -u $UMI_len -s $thresh -o $outdir/cell_gene_splice_count/
+Rscript script−cscript -c outdir/sub_cell_exon/sub_cell_exon.*.txt -u UMIlen−sUMI_len -s thresh -o $outdir/cell_gene_splice_count/
 ```
 This step does UMI deduplication for each gene in single cell. The correction for wrong mapping and truncations is also embedded in this step. This step loops over all `sub_cell_exons.txt` output from step4, thus it's simple to be paralleled. As correction for wrong mapping should integrate UMI clusters from all cells, the minimal unit in parallelization is a gene for all cells.
 
@@ -166,7 +166,7 @@ __optional__:
 1. --barlen,-b: The length of the cell barcode
 2. --umilen,-u: The length of UMI
 3. --flank,-f: The flank to extract UMI to be tolerant to insertions and deletions
-4. --thresh,-s: threshold for the similarity between UMI, usually can be set as $\frac{umilen+2\times flank}{2}$
+4. --thresh,-s: threshold for the similarity between UMI, usually can be set as umilen+2×flank2\frac{umilen+2\times flank}{2}
 5. --splice_site_thresh,-ss: threshold to filter out infrequent splice sites
 
 The output `sub_cell_gene_splice_count.*.txt` is a table with 7 columns, including:  
@@ -180,8 +180,8 @@ The output `sub_cell_gene_splice_count.*.txt` is a table with 7 columns, includi
 
 ### optional step6: trasform exon bins to exon id
 ```
-Rscript ./spliceob/createExonList.R $outdir/cell_gene_splice_count/ $bed_folder/gene_bed.rds $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt
-awk 'FNR>1 || NR==1' $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt > $outdir/cell_gene_exon_count/cell_gene_exon_count.txt
+Rscript ./spliceob/createExonList.R outdir/cellgenesplicecount/outdir/cell_gene_splice_count/ bed_folder/gene_bed.rds $outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt
+awk 'FNR>1 || NR==1' outdir/cellgeneexoncount/subcellgeneexoncount.∗.txt>outdir/cell_gene_exon_count/sub_cell_gene_exon_count.*.txt > outdir/cell_gene_exon_count/cell_gene_exon_count.txt
 ```
 This step transforms the exon bins to exon id given the input bed annotation. Bed annotation could be canonical or self-made from the data. This step loops over all files in the input folder, which is output from step 5, thus it's also paralleled by GNU.
 
@@ -195,7 +195,7 @@ The output `sub_cell_gene_exon_count.*.txt` is generally the same as `sub_cell_g
 
 ### optional step7: save the data for Longcell
 ```
-Rscript ./spliceob/saveExonList.R $outdir/cell_gene_exon_count/cell_gene_exon_count.txt $outdir/cell_gene_exon_count/
+Rscript ./spliceob/saveExonList.R outdir/cellgeneexoncount/cellgeneexoncount.txtoutdir/cell_gene_exon_count/cell_gene_exon_count.txt outdir/cell_gene_exon_count/
 ```
 #### parameters
 __required__: 
