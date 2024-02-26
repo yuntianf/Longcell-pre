@@ -1,3 +1,5 @@
+This version of Longcell-pre has been deprecated.
+
 Longcell-pre is a pipeline to analyze Nanopore long read sequencing dataset based on 10X single cell sequencing toolkit. This pipeline includes preprocessing to do barcode and unique molecular identifier (UMI) assignment to give an accurate isoform quantification. Based on the isoform quantification from Longcell-pre, our another  pipeline Longcell incorporates downstream splicing analysis, including identification of highly variable exons and differential alternative splicing analysis between different cell populations.
 
 
@@ -32,7 +34,7 @@ g++ -O2 BarcodeMatch.cpp bc.cpp edit.cpp normal.cpp -o BarcodeMatch
 
 ### step1: transform gtf to gene bed
 ```
-Rscript ./Auxiliary/gtf2bed.R -g $gtf -o $bed_folder
+Rscript ./Auxiliary/gtf2bed.R -g gtf−ogtf -o bed_folder
 ```
 This step will transform the isoform annotation in gtf into non-overlapping sub-exons and save it as a bed file for each gene. The output is a table with 5 columns, including:
 1. chromosome  
@@ -47,7 +49,7 @@ __required__:
 
 ### step2: Single cell isoform quantification
 ```
-./Longcell-pre.sh -b $bam_file -d $bed_dir -w $barcode_whitelist -c $cores_num -o $out_dir
+./Longcell-pre.sh -b bamfile−dbam_file -d bed_dir -w barcodewhitelist−cbarcode_whitelist -c cores_num -o $out_dir
 ```
 This is an integrated pipeline to directly generate single cell isoform quantification from the bam. The output include three folders:
 1. barcode_match: stores the barcode match result  
